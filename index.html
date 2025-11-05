@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ลอยกระทง w/TT</title>
+  <style>
+    :root{
+      --bg-night:#0b1426;
+      --bg-river:#0f2747;
+      --panel:#0d1a2b;
+      --gold:#f5d35e; --pink:#ff8fb6; --green:#3fc28a; --orange:#ffb562; --white:#fff9e6;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Noto Sans",sans-serif}
+    body{background:linear-gradient(to bottom,var(--bg-night),#09121f 46%, var(--bg-river) 46%);color:#f0f6ff;display:flex;flex-direction:column;overflow:hidden}
+
+    header{padding:14px 18px;display:flex;gap:12px;align-items:center;justify-content:space-between}
+    header h1{font-size:18px;margin:0;font-weight:800;letter-spacing:.3px}
+    .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    .controls input[type="text"]{min-width:220px;max-width:60vw;padding:10px 12px;border-radius:14px;border:1px solid #2c3e50;background:var(--panel);color:#e8eef7}
+    .btn{cursor:pointer;border:none;padding:10px 14px;border-radius:14px;background:#2f6db0;color:white;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.25);transition:transform .08s ease}
+    .btn:active{transform:translateY(1px)}
+    .hint{opacity:.8;font-size:12px}
+    .toggles{display:flex;gap:8px;align-items:center}
+    .toggle{display:inline-flex;gap:6px;align-items:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);padding:8px 10px;border-radius:12px}
+
+    .scene{position:relative;flex:1;overflow:hidden}
+
+    .banner{position:absolute;left:50%;top:12px;transform:translateX(-50%);padding:10px 16px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(4px);font-weight:800;letter-spacing:.3px;color:#fff;text-shadow:0 1px 6px rgba(255,209,128,.35);box-shadow:0 8px 24px rgba(0,0,0,.25)}
+    .banner .spark{display:inline-block;margin-left:8px;filter:drop-shadow(0 0 12px rgba(255,214,120,.6))}
+
+    .moon{position:absolute;top:26px;right:24px;width:78px;height:78px;border-radius:50%;background:radial-gradient(circle at 30% 30%, #fff 0%, #ffeec2 40%, #ffd56b 65%, rgba(255,213,107,0) 70%);filter:blur(.3px);box-shadow:0 0 40px 10px rgba(255,240,200,.25)}
+    .stars{position:absolute;inset:0;pointer-events:none}
+    .stars i{position:absolute;width:2px;height:2px;background:#e8f1ff;border-radius:50%;opacity:.9}
+
+    /* sky lanterns */
+    .lantern{position:absolute;width:22px;height:28px;border-radius:6px 6px 10px 10px;background:linear-gradient(#fff3d6,#ffd9a1);box-shadow:0 4px 16px rgba(255,200,120,.45);opacity:.9}
+    .lantern::after{content:"";position:absolute;left:50%;bottom:4px;transform:translateX(-50%);width:8px;height:8px;border-radius:50%;background:radial-gradient(#fff,#ffd27a 60%, rgba(255,210,122,0) 70%)}
+
+    .river{position:absolute;left:0;right:0;bottom:100px;height:56%;background:linear-gradient(#11325b 0%, #0f2747 50%, #0a1d37 100%)}
+    .wave{position:absolute;left:-25%;right:-25%;height:38px;background:radial-gradient(ellipse at top, rgba(255,255,255,.18), rgba(255,255,255,0) 60%);opacity:.35;filter:blur(1px);animation:drift 9s linear infinite}
+    .wave:nth-child(2){top:22%;animation-duration:13s;opacity:.30}
+    .wave:nth-child(3){top:48%;animation-duration:16s;opacity:.24}
+    .wave:nth-child(4){top:74%;animation-duration:20s;opacity:.20}
+    @keyframes drift{to{transform:translateX(40%)}}
+
+    /* cute koi under water */
+    .koi{position:absolute;width:28px;height:14px;border-radius:14px/8px;background:#f7a7a7;opacity:.45;filter:blur(.2px)}
+    .koi::before{content:"";position:absolute;right:-6px;top:2px;width:10px;height:10px;border-radius:60% 40% 60% 40%;background:#f7a7a7;transform:rotate(30deg)}
+
+    .shore{position:absolute;left:0;right:0;bottom:0;height:110px;background:linear-gradient(#3b2a1a,#2c2015);box-shadow:0 -6px 30px rgba(0,0,0,.35) inset,0 -1px 0 rgba(255,255,255,.05) inset}
+    .tray{position:absolute;left:50%;transform:translateX(-50%);bottom:10px;display:flex;gap:12px;align-items:flex-end}
+    .tray .tip{position:absolute;left:50%;transform:translateX(-50%);bottom:78px;font-size:12px;opacity:.9;white-space:nowrap}
+
+    .krathong{position:absolute;width:90px;height:90px;transform-origin:center;cursor:pointer}
+    .krathong:hover{transform:scale(1.06)}
+    .glow{filter:drop-shadow(0 8px 14px rgba(255,214,120,.28)) drop-shadow(0 2px 2px rgba(0,0,0,.55))}
+
+    .wish{position:absolute;bottom:140px;left:50%;transform:translateX(-50%);padding:8px 14px;border-radius:999px;background:rgba(14,24,40,.35);color:#fff;border:1px solid rgba(255,255,255,.1);font-size:13px;font-weight:600;max-width:260px;text-align:center;backdrop-filter:none;letter-spacing:.3px}
+    .wish::after{content:"";position:absolute;left:50%;bottom:-8px;transform:translateX(-50%) rotate(45deg);width:10px;height:10px;background:rgba(14,24,40,.35);border:1px solid rgba(255,255,255,.1);border-left:none;border-top:none}
+
+    .ripple{position:absolute;width:4px;height:4px;border:1px solid rgba(255,255,255,.35);border-radius:999px;opacity:.9;pointer-events:none}
+    .confetti{position:fixed;width:6px;height:10px;border-radius:2px;opacity:.95;pointer-events:none}
+    .firefly{position:absolute;width:4px;height:4px;border-radius:50%;background:#ffd86b;box-shadow:0 0 8px #ffd86b;opacity:.8;pointer-events:none}
+
+    @media (max-width:560px){.krathong{width:74px;height:74px}.wish{max-width:200px}}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>ลอยกระทง w/ เค้าเองงง</h1>
+    <div class="controls">
+      <input id="wishInput" type="text" placeholder="พิมพ์คำอธิษฐาน/ข้อความ (ไม่บังคับ)" />
+      <button class="btn" id="launchBtn">ปล่อยกระทง</button>
+      <span class="hint">คลิกกระทง แล้วดูความน่ารักกระจาย ✨</span>
+      <div class="toggles">
+        <label class="toggle"><input type="checkbox" id="toggleLanterns" checked> โคมลอย</label>
+        <label class="toggle"><input type="checkbox" id="toggleFireflies" checked> หิ่งห้อย</label>
+        <label class="toggle"><input type="checkbox" id="toggleSound" checked> เสียงติ้ง</label>
+      </div>
+    </div>
+  </header>
+
+  <div class="scene" id="scene">
+    <div class="banner" id="banner"><span></span><i class="spark">✨</i></div>
+    <div class="moon"></div>
+    <div class="stars" id="stars"></div>
+
+    <div class="river" id="river">
+      <div class="wave"></div>
+      <div class="wave"></div>
+      <div class="wave"></div>
+      <div class="wave"></div>
+    </div>
+
+    <div class="shore">
+      <div class="tray" id="tray">
+        <div class="tip">เลือกแบบที่ชอบแล้วคลิกเพื่อปล่อยเลยยย</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Krathong Template (classic) -->
+  <template id="krathong-template">
+    <svg class="krathong" viewBox="0 0 100 100" aria-label="krathong">
+      <defs>
+        <radialGradient id="glowGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ffe7a1" stop-opacity="0.9"/>
+          <stop offset="80%" stop-color="#ffe7a1" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="leafGrad" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="#45d39c"/>
+          <stop offset="100%" stop-color="#2aa874"/>
+        </linearGradient>
+        <linearGradient id="baseGrad" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="#ffce6a"/>
+          <stop offset="100%" stop-color="#d89a29"/>
+        </linearGradient>
+      </defs>
+      <circle cx="50" cy="58" r="28" fill="url(#glowGrad)" opacity="0.35"/>
+      <g transform="translate(0,40)">
+        <g fill="url(#leafGrad)">
+          <path d="M8,30 Q20,10 32,30 Z"/>
+          <path d="M28,30 Q40,10 52,30 Z"/>
+          <path d="M48,30 Q60,10 72,30 Z"/>
+          <path d="M68,30 Q80,10 92,30 Z"/>
+        </g>
+        <ellipse cx="50" cy="34" rx="38" ry="10" fill="url(#baseGrad)"/>
+        <ellipse cx="50" cy="38" rx="34" ry="8" fill="#7a4b1d" opacity=".35"/>
+      </g>
+      <g transform="translate(0,40)">
+        <circle cx="30" cy="22" r="5" fill="#ffb84d"/>
+        <circle cx="50" cy="20" r="6" fill="#ff8fb6"/>
+        <circle cx="70" cy="22" r="5" fill="#ffd871"/>
+      </g>
+      <g transform="translate(0,18)">
+        <rect x="48" y="18" width="4" height="18" rx="1" fill="#f6e1a6"/>
+        <path d="M50 16 c 3 6 -3 6 0 0" fill="#ffdf8b"/>
+        <path d="M50 16 c 2 6 -2 6 0 0" fill="#ffd06a"/>
+      </g>
+    </svg>
+  </template>
+
+  <script>
+    const scene = document.getElementById('scene');
+    const river = document.getElementById('river');
+    const tray  = document.getElementById('tray');
+    const wishInput = document.getElementById('wishInput');
+    const banner = document.getElementById('banner');
+    const launchBtn = document.getElementById('launchBtn');
+    const toggleLanterns = document.getElementById('toggleLanterns');
+    const toggleFireflies = document.getElementById('toggleFireflies');
+    const toggleSound = document.getElementById('toggleSound');
+
+    const DEFAULT_MSG = "Happy Loykratong day kub N'Mo";
+    wishInput.value = DEFAULT_MSG; setBanner(DEFAULT_MSG);
+    function setBanner(text){ if(!text){ banner.style.display='none'; return; } banner.querySelector('span').textContent = text; banner.style.display='inline-flex'; }
+
+    // Stars
+    (function makeStars(){ const holder = document.getElementById('stars'); const N = 100; for(let i=0;i<N;i++){ const s = document.createElement('i'); s.style.left = Math.random()*100 + '%'; s.style.top = Math.random()*40 + '%'; s.style.opacity = 0.5 + Math.random()*0.5; s.style.transform = `scale(${0.6+Math.random()*1.4})`; holder.appendChild(s);} })();
+
+    // Lanterns (floating up)
+    let lanternTimer=null; function spawnLantern(){ if(!toggleLanterns.checked) return; const l=document.createElement('div'); l.className='lantern'; l.style.left = (10+Math.random()*65)+'%'; l.style.top = (60+Math.random()*30)+'px'; scene.appendChild(l); const dur=8000+Math.random()*6000; l.animate([{transform:'translateY(0) scale(1)',opacity:.85},{transform:'translateY(-220px) scale(1.05)',opacity:0.2}],{duration:dur,easing:'linear'}).onfinish=()=>l.remove(); }
+    function startLanterns(){ if(lanternTimer) clearInterval(lanternTimer); lanternTimer=setInterval(spawnLantern, 1200); }
+    toggleLanterns.addEventListener('change', ()=>{ if(toggleLanterns.checked) startLanterns(); }); startLanterns();
+
+    // Fireflies (random walk)
+    const fireflies = []; function spawnFireflies(count=12){ for(let i=0;i<count;i++){ const f=document.createElement('div'); f.className='firefly'; f.style.left=(5+Math.random()*90)+'%'; f.style.top =(50+Math.random()*40)+'%'; scene.appendChild(f); fireflies.push(f); wiggle(f); } }
+    function wiggle(el){ const dx=(Math.random()*2-1)*40, dy=(Math.random()*2-1)*20, dur=2000+Math.random()*2000; el.animate([{transform:'translate(0,0)',opacity:.6+Math.random()*.4},{transform:`translate(${dx}px,${dy}px)`,opacity:.4+Math.random()*.6}],{duration:dur,direction:'alternate',iterations:Infinity,easing:'ease-in-out'}); }
+    toggleFireflies.addEventListener('change', ()=>{ fireflies.forEach(f=>f.style.display= toggleFireflies.checked?'block':'none'); }); spawnFireflies();
+
+    // Koi fish under water
+    (function koi(){ for(let i=0;i<6;i++){ const k=document.createElement('div'); k.className='koi'; const riverRect=river.getBoundingClientRect(); const sceneRect=scene.getBoundingClientRect(); const y= (riverRect.top-sceneRect.top)+ riverRect.height*(0.2+Math.random()*0.6); k.style.top = y+'px'; k.style.left = (-60 - Math.random()*200)+'px'; scene.appendChild(k); const dur=12000+Math.random()*8000; k.animate([{transform:'translateX(0)'},{transform:`translateX(${scene.clientWidth+300}px)`}],{duration:dur,iterations:Infinity,delay:Math.random()*4000,easing:'linear'}); } })();
+
+    // Tray (3 palettes)
+    const baseTemplate = document.getElementById('krathong-template').content;
+    const styles = [
+      {leaf:['#45d39c','#2aa874'], base:['#ffce6a','#d89a29'], flowers:['#ffb84d','#ff8fb6','#ffd871']},
+      {leaf:['#59c2ff','#2b8dcf'], base:['#ffc2d1','#e889a3'], flowers:['#ffd871','#ffd1dc','#fff0a8']},
+      {leaf:['#b8e986','#78c257'], base:['#ffd08a','#e7a653'], flowers:['#ff9aa2','#ffdac1','#e2f0cb']}
+    ];
+    function makeTrayKrathongs(){ styles.forEach(palette=>{ const node=document.importNode(baseTemplate,true); const svg=node.querySelector('svg'); svg.style.position='static'; svg.style.cursor='pointer'; colorize(svg,palette); svg.addEventListener('click',()=> launchKrathong(palette)); tray.appendChild(svg); }); }
+    makeTrayKrathongs();
+
+    launchBtn.addEventListener('click', ()=> launchKrathong(styles[Math.floor(Math.random()*styles.length)]));
+
+    const active = new Set(); let audioCtx=null; function playDing(){ if(!toggleSound.checked) return; if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); const o=audioCtx.createOscillator(), g=audioCtx.createGain(); o.type='triangle'; o.frequency.setValueAtTime(880, audioCtx.currentTime); g.gain.setValueAtTime(0.0001, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.2, audioCtx.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime+0.25); o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+0.28); }
+
+    function launchKrathong(palette){
+      const node=document.importNode(baseTemplate,true); const svg=node.querySelector('svg'); colorize(svg,palette); svg.classList.add('glow');
+      const startX=-90; const riverRect=river.getBoundingClientRect(); const sceneRect=scene.getBoundingClientRect(); const startY=riverRect.top-sceneRect.top + riverRect.height*(0.15+Math.random()*0.65);
+      svg.style.left=startX+'px'; svg.style.top=startY+'px'; svg.style.position='absolute'; svg.style.cursor='default'; scene.appendChild(svg);
+
+      // wish label
+      const text=(wishInput.value||DEFAULT_MSG).trim(); let label=null; if(text){ label=document.createElement('div'); label.className='wish'; label.textContent=text; scene.appendChild(label); }
+
+      // ripple
+      createRipple(startX+50,startY+60);
+
+      // motion
+      const speed=30+Math.random()*20, bobAmp=6+Math.random()*5, bobFreq=1.2+Math.random()*1.0, drift=8*(Math.random()<.5?-1:1);
+      const state={el:svg,label,x:startX,y:startY,t0:performance.now()/1000,dead:false}; active.add(state);
+      // flame subtle flicker (scale)
+      const flame = svg.querySelector('g[transform="translate(0,18)"]');
+      flame.animate([{transform:'translate(0,18) scale(1)'},{transform:'translate(0,18) scale(1.06)'},{transform:'translate(0,18) scale(0.98)'}],{duration:1200,iterations:Infinity,direction:'alternate',easing:'ease-in-out'});
+
+      function step(now){ if(state.dead) return; const t=now/1000-state.t0; state.x=startX+t*speed; state.y=startY+Math.sin(t*2*Math.PI*bobFreq)*bobAmp+(t*drift*0.15); svg.style.left=state.x+'px'; svg.style.top=state.y+'px'; if(label){ label.style.left=(state.x+svg.clientWidth/2)+'px'; label.style.top=(state.y-10)+'px'; } if(state.x>scene.clientWidth+120){ state.dead=true; active.delete(state); svg.remove(); if(label) label.remove(); return; } requestAnimationFrame(step); }
+      requestAnimationFrame(step);
+
+      // sparkle + confetti + ding
+      svg.addEventListener('click', ()=>{ sparkle(svg); confettiBurst(svg); playDing(); }); if(label) label.addEventListener('click', ()=>{ sparkle(svg); confettiBurst(svg); playDing(); });
+      playDing();
+      wishInput.value='';
+    }
+
+    function colorize(svg, palette){ const lg=svg.querySelector('linearGradient#leafGrad'); lg.querySelectorAll('stop')[0].setAttribute('stop-color', palette.leaf[0]); lg.querySelectorAll('stop')[1].setAttribute('stop-color', palette.leaf[1]); const bg=svg.querySelector('linearGradient#baseGrad'); bg.querySelectorAll('stop')[0].setAttribute('stop-color', palette.base[0]); bg.querySelectorAll('stop')[1].setAttribute('stop-color', palette.base[1]); const circles=svg.querySelectorAll('g[transform="translate(0,40)"] circle'); circles[0].setAttribute('fill', palette.flowers[0]); circles[1].setAttribute('fill', palette.flowers[1]); circles[2].setAttribute('fill', palette.flowers[2]); }
+
+    function createRipple(x,y){ const r=document.createElement('div'); r.className='ripple'; r.style.left=x+'px'; r.style.top=y+'px'; scene.appendChild(r); r.animate([{transform:'translate(-50%,-50%) scale(0.2)',opacity:.6},{transform:'translate(-50%,-50%) scale(2.2)',opacity:0}],{duration:900,easing:'ease-out'}).onfinish=()=>r.remove(); }
+
+    function sparkle(target){ const rect=target.getBoundingClientRect(); const cx=rect.left+rect.width/2+window.scrollX; const cy=rect.top+rect.height/2+window.scrollY; for(let i=0;i<10;i++){ const p=document.createElement('div'); p.style.position='absolute'; p.style.left=cx+'px'; p.style.top=cy+'px'; p.style.width=p.style.height='4px'; p.style.borderRadius='50%'; p.style.background= i%2? '#ffd56b':'#ff9aa2'; p.style.pointerEvents='none'; document.body.appendChild(p); const ang=Math.random()*Math.PI*2; const r=20+Math.random()*20; const dx=Math.cos(ang)*r; const dy=Math.sin(ang)*r; p.animate([{transform:'translate(-50%,-50%) scale(1)',opacity:1},{transform:`translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0)`,opacity:0}],{duration:600+Math.random()*300,easing:'cubic-bezier(.2,.8,.2,1)'}).onfinish=()=>p.remove(); } }
+
+    function confettiBurst(target){ const rect=target.getBoundingClientRect(); const cx=rect.left+rect.width/2+window.scrollX; const cy=rect.top+window.scrollY; const colors=['#ff8fb6','#ffd56b','#8be0d4','#e0b3ff']; for(let i=0;i<14;i++){ const c=document.createElement('div'); c.className='confetti'; c.style.left=cx+'px'; c.style.top=cy+'px'; c.style.background=colors[i%colors.length]; document.body.appendChild(c); const ang=-Math.PI/2 + (Math.random()-0.5)*1.2; const v= (2+Math.random()*3)*80; const dx=Math.cos(ang)*v; const dy=Math.sin(ang)*v; c.animate([{transform:'translate(-50%,-50%) rotate(0deg)',opacity:1},{transform:`translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) rotate(${Math.random()*360}deg)`,opacity:0}],{duration:900+Math.random()*500,easing:'cubic-bezier(.15,.8,.2,1)'}).onfinish=()=>c.remove(); } }
+  </script>
+</body>
+</html>
